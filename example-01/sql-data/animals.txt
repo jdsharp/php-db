@@ -1,0 +1,1 @@
+animal_guid	animal_key	description
