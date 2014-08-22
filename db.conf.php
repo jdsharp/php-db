@@ -5,3 +5,4 @@ define('DB_USER', 'php_db_test');
 define('DB_PASS', 'UpUpAndAway!');
 
 define('DB_SQL_PATH', dirname(__FILE__) . DIRECTORY_SEPARATOR . 'example-01' . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR );
+define('DB_SQL_DATA_PATH', dirname(__FILE__) . DIRECTORY_SEPARATOR . 'example-01' . DIRECTORY_SEPARATOR . 'sql-data' . DIRECTORY_SEPARATOR);

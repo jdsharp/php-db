@@ -1,17 +1,21 @@
 <?php
+// Have this run against example-01
+require_once( dirname( dirname(__FILE__) ) . '/example-01/init.php' );
 
-require_once( dirname( dirname(__FILE__) ) . '/init.php' );
-
-function load_populate_data($file)
+function load_populate_data($src)
 {
-	$db    = preg_replace('/^([^.]+)\..+/', '$1', $file);
-	$src   = dirname( dirname(__FILE__) ) . '/sql-data/' . $file;
+	$file  = basename($src);
+	$table = preg_replace('/^([^.]+)\..+/', '$1', $file);
 	$data  = file_get_contents($src);
 	$lines = explode("\n", $data);
 
+	if ( !class_exists($table) ) {
+		$table = 'stdClass';
+	}
+
+	// Extract the headers
 	$headers = array_shift($lines);
 	preg_match_all("/(\w+)/", $headers, $matched);
-	
 	$keys = $matched[1];
 	
 	$data = array();
@@ -21,26 +25,26 @@ function load_populate_data($file)
 			continue;
 		}
 		$line = explode("\t", $line);
-		$tmp  = new $db;
+		$obj  = new $table;
 
 		$created = false;
-		if ( isset($tmp->created) ) {
+		if ( isset($obj->created) ) {
 			$created = true;
 		}
 
 		// Go through and unset any fields
-		$tmp = unset_object_keys_except($tmp, $keys);
+		$obj = unset_object_keys_except($obj, $keys);
 		if ( $created ) {
-			$tmp->created = time();
+			$obj->created = time();
 		}
 		
 		foreach ( $keys AS $i => $k ) {
 			if ( strpos($line[$i], '\n') !== false ) {
 				$line[$i] = str_replace('\n', "\n", $line[$i]);
 			}
-			$tmp->{$k} = $line[$i];
+			$obj->{$k} = $line[$i];
 		}
-		$data[] = $tmp;
+		$data[] = $obj;
 	}
 
 	return $data;
@@ -48,7 +52,7 @@ function load_populate_data($file)
 
 $files = array();
 
-$path = dirname(dirname(__FILE__)) . '/sql-data';
+$path = DB_SQL_DATA_PATH;
 if ( is_dir($path) ) {
 	$d = dir($path);
 	$files = array();
@@ -60,17 +64,23 @@ if ( is_dir($path) ) {
 	$d->close();
 }
 
+echo "Searching: $path\n";
+echo "    Found: " . count($files) . " file" . (count($files) > 1 ? 's' : '') . "\n";
+echo "\n";
+
 foreach ( $files AS $file ) {
-	$db   = preg_replace('/^([^.]+)\..+/', '$1', $file);
-	$data = load_populate_data($file);
-	echo "Found " . count($data) . " records for $file\n";
+	echo "Reading: $file\n";
+	$table = preg_replace('/^([^.]+)\..+/', '$1', $file);
+	$data  = load_populate_data($path . DIRECTORY_SEPARATOR . $file);
+	echo "    > Found " . count($data) . " records\n";
+
 	$saved = 0;
 	foreach ( $data AS $obj ) {
-		$ret = db_save($db, $obj);
+		$ret = db_save($table, $obj);
 		if ( $ret !== false ) {
 			$saved++;
 		}
 	}
-	echo "\t$saved records saved.\n";
+	echo "    > Saved $saved records\n";
 }
 echo "Finished.\n";

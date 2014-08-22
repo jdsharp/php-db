@@ -3,6 +3,7 @@
 $project_root = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'example-01';
 require_once( $project_root . '/init.php' );
 
+
 // This is the path to the folder where the .sql files exist.
 $path = DB_SQL_PATH;
 if ( is_dir($path) ) {
@@ -20,8 +21,14 @@ $pdo = db_conn();
 $pdo->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 
 echo "Searching: $path\n";
-echo "Found:     " . count($files) . " files\n";
+echo "    Found: " . count($files) . " sql file" . (count($files) > 1 ? 's' : '') . "\n";
 echo "\n";
+
+if ( count($files) == 0 ) {
+	echo "Finished.\n";
+	exit;
+}
+
 foreach ( $files AS $file => $content ) {
 	echo "Running: $file\n";
 	// Remove all comments (that contain a #)

@@ -1,1 +1,2 @@
 animal_guid	animal_key	description
+A3ED827D-7064-701D-4278-4E2FDBB3A3E4	horse	Horses are awesome animals!
